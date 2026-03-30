@@ -1,0 +1,14 @@
+.env
+.env.*
+vendor/
+node_modules/
+storage/logs/
+storage/framework/
+storage/app/public/
+bootstrap/cache/
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+.auth.json
