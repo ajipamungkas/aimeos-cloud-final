@@ -1,59 +1,232 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+```markdown
+# 🛒 Aimeos E-Commerce Cloud Deployment
 
-## About Laravel
+## 📋 Project Overview
+Final Project - Cloud Full-Stack Deployment untuk DigitalSkola.  
+E-commerce platform dengan Laravel 12 + Aimeos 2025.10 LTS yang di-deploy menggunakan arsitektur cloud-native (AWS EC2, RDS, S3).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🌍 Live Deployment
+- **Production URL**: http://47.129.182.229/
+- **Admin Panel**: http://47.129.182.229/admin
+- **Credentials**: 
+  - Email: admin@email.com
+  - Password: Admin123!
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🏗️ Architecture
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   CloudFlare│────▶│   EC2       │────▶│   RDS       │
+│   (DNS)     │     │ t3.small    │     │  MySQL 8.0  │
+└─────────────┘     │  (PHP+Nginx)│     │  (Managed)  │
+                    └──────┬──────┘     └─────────────┘
+                           │
+                    ┌──────┴──────┐
+                    │     S3      │
+                    │  (Storage)  │
+                    └─────────────┘
+```
 
-## Learning Laravel
+## 🛠️ Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+| Layer | Technology | Version |
+|-------|------------|---------|
+| **Framework** | Laravel | 12.x |
+| **E-Commerce** | Aimeos | 2025.10 LTS |
+| **Language** | PHP | 8.3 FPM |
+| **Web Server** | Nginx | 1.18 |
+| **Database** | MySQL (RDS) | 8.0 |
+| **Storage** | AWS S3 | Standard |
+| **Cloud** | AWS EC2 | t3.small (2GB RAM) |
+| **OS** | Ubuntu | 22.04 LTS |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🚀 Deployment Steps
 
-## Laravel Sponsors
+### 1. Infrastructure Setup (AWS Console)
+```bash
+# EC2 Instance
+- Launch t3.small (2GB RAM, 20GB gp3)
+- Security Group: Port 22 (SSH), 80 (HTTP), 443 (HTTPS)
+- IAM Role: AmazonS3FullAccess
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# RDS Database
+- Engine: MySQL 8.0
+- Instance: db.t3.micro (Free Tier)
+- Public Access: Yes (initial setup)
+- Security Group: Allow port 3306 from EC2-SG
 
-### Premium Partners
+# S3 Bucket
+- Name: aimeos-capstone-media
+- Region: ap-southeast-1
+- CORS: Enabled for web upload
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 2. Server Configuration (EC2)
+```bash
+# Update & Install Stack
+sudo apt update && sudo apt install -y nginx php8.3-fpm php8.3-cli \
+    php8.3-mbstring php8.3-xml php8.3-curl php8.3-zip php8.3-bcmath \
+    php8.3-gd php8.3-intl php8.3-opcache php8.3-mysql unzip git curl
 
-## Contributing
+# Install Composer
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Clone Repository
+cd /var/www/html
+sudo git clone https://github.com/ajipamungkas/aimeos-cloud-final.git .
+```
 
-## Code of Conduct
+### 3. Application Setup
+```bash
+# Install Dependencies
+composer install --no-dev --optimize-autoloader --no-interaction
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Setup Environment
+cp .env.example .env
+php artisan key:generate
 
-## Security Vulnerabilities
+# Database Migration (RDS)
+php artisan migrate --force
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Aimeos Setup
+php artisan aimeos:setup --option=setup/default/demo:1
+php artisan aimeos:account admin@email.com --password=Admin123! --super
 
-## License
+# Permissions
+sudo chown -R www-data:www-data /var/www/html
+sudo chmod -R 755 storage bootstrap/cache
+sudo chmod -R 777 public/files public/preview public/uploads
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 4. Nginx Configuration
+```nginx
+server {
+    listen 80;
+    server_name _;
+    root /var/www/html/public;
+    index index.php;
+    
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+    
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+    }
+    
+    location ~ /\.ht {
+        deny all;
+    }
+}
+```
+
+## 🔄 CI/CD Pipeline
+
+**File**: `.github/workflows/deploy.yml`
+
+Pipeline otomatis yang berjalan saat push ke branch `main`:
+1. Checkout kode terbaru
+2. SSH ke EC2 instance
+3. Pull repository
+4. Install composer dependencies
+5. Run database migrations
+6. Clear cache & restart Nginx
+
+**Trigger**: Setiap push ke branch `main`
+
+## 📊 Monitoring & Logging
+
+### System Monitoring
+- **Tool**: `htop` (real-time CPU, Memory, Processes)
+- **Command**: `htop` atau `docker stats` (jika pakai Docker)
+- **CloudWatch**: Basic monitoring enabled (CPU Utilization, Network In/Out)
+
+### Application Logs
+- **Laravel Log**: `/var/www/html/storage/logs/laravel.log`
+- **Nginx Access**: `/var/log/nginx/access.log`
+- **Nginx Error**: `/var/log/nginx/error.log`
+
+### Health Check Endpoint
+```
+GET /health
+Response: {"status": "ok", "database": "connected", "timestamp": "2026-03-30..."}
+```
+
+## 🔐 Security Measures
+
+1. **Database Security**
+   - RDS tidak publicly accessible (setelah initial setup)
+   - Security Group restrict: Port 3306 hanya dari EC2 Security Group
+   - Credentials tidak di-hardcode (menggunakan .env)
+
+2. **Application Security**
+   - APP_DEBUG=false (production mode)
+   - Laravel Sanctum untuk API authentication (jika ada)
+   - HTTPS ready (port 443 open, SSL certificate dapat di-install)
+
+3. **Server Security**
+   - Security Group EC2: Port 22 (SSH) restricted ke IP tertentu
+   - File permissions: storage (755), public files (777 untuk upload)
+   - Regular security updates: `sudo apt update`
+
+4. **S3 Security**
+   - Bucket policy: Public read untuk assets, private untuk uploads
+   - IAM Role attached ke EC2 (tidak menggunakan access key di code)
+
+## 📸 Screenshots
+
+### 1. Homepage E-Commerce
+![Homepage](screenshots/homepage.png)
+*Landing page dengan katalog produk Aimeos*
+
+### 2. Admin Dashboard
+![Admin](screenshots/admin.png)
+*Panel administrasi untuk manage produk dan orders*
+
+### 3. System Monitoring
+![Monitoring](screenshots/monitoring.png)
+*htop showing resource usage di EC2 t3.small*
+
+### 4. CI/CD Pipeline
+![CI-CD](screenshots/cicd.png)
+*GitHub Actions deployment status*
+
+## 📝 Notes & Troubleshooting
+
+**Common Issues:**
+- **Permission Denied**: Jalankan `sudo chmod -R 777 storage public/files`
+- **Database Connection**: Cek Security Group RDS (harus allow dari EC2)
+- **Memory Limit**: t3.small (2GB) cukup, tapi tambahkan swap 1GB untuk safety
+
+**Resource Usage:**
+- RAM: ~1.2GB / 2GB (saat idle)
+- Disk: ~4GB / 20GB (termasuk vendor dan uploads)
+- Database: ~50MB (untuk demo data)
+
+## 👤 Author
+- **Name**: Setya Aji Pamungkas
+- **Course**: DigitalSkola - Cloud Engineering
+- **Project**: Capstone Final Project & Deployment Review
+```
+
+---
+
+## ⚡ Cara Upload ke GitHub
+
+**Di EC2 terminal:**
+```bash
+cd /var/www/html
+nano README.md
+# Paste konten di atas, save (Ctrl+O, Enter, Ctrl+X)
+
+git add README.md
+git commit -m "docs: Add comprehensive README with architecture and deployment steps"
+git push origin main
+```
+
+**Cek di browser:** `https://github.com/ajipamungkas/aimeos-cloud-final`
+
+Sudah siap? Atau mau saya tambahin bagian tertentu (misal diagram arsitektur yang lebih detail atau penjelasan CI/CD)?
