@@ -13,20 +13,8 @@ E-commerce platform dengan Laravel 12 + Aimeos 2025.10 LTS yang di-deploy menggu
   - Email: admin@email.com
   - Password: Admin123!
 
-## 🏗️ Architecture
+<img width="855" height="541" alt="image" src="https://github.com/user-attachments/assets/0b5488bf-ff52-458c-9172-82aa9a9a393f" />
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   CloudFlare│────▶│   EC2       │────▶│   RDS       │
-│   (DNS)     │     │ t3.small    │     │  MySQL 8.0  │
-└─────────────┘     │  (PHP+Nginx)│     │  (Managed)  │
-                    └──────┬──────┘     └─────────────┘
-                           │
-                    ┌──────┴──────┐
-                    │     S3      │
-                    │  (Storage)  │
-                    └─────────────┘
-```
 
 ## 🛠️ Tech Stack
 
